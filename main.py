@@ -31,9 +31,19 @@ async def on_message(mention: discord.Message):
         await mention.channel.send(content='I can\'t process any messages via PM. If you have any problem please go to the support server. https://discord.gg/pcS4MPbRDU')
         return
 
-    match = re.match(r'!render (\d+)', mention.content)
-    if match:
-        number = int(match.group(1))
+    # Was there any response?
+    inResponseTo = None
+    if (mention.reference):
+        inResponseTo = mention.reference.resolved
+
+    # Has the user specified any number?
+    match = re.match(r'!render( (\d+))?', mention.content)
+    number = None
+    if match and match.group(2) is not None:
+        number = int(match.group(2))
+
+    # If any of them exists we can work
+    if number or inResponseTo:
         if (number < 2 or number > 150):
             await mention.channel.send(content='Number of messages must be between 2 and 150')
             return
